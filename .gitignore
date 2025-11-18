@@ -1,0 +1,41 @@
+# Environnement virtuel Python
+venv/
+env/
+ENV/
+.venv/
+
+# Fichiers Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Logs
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Configuration locale (peut contenir clés API)
+config/config.yaml
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Fichiers temporaires
+*.tmp
+*.temp
+*.bak
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/

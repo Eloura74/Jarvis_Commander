@@ -1,0 +1,6 @@
+Collecting pvporcupine
+  Using cached pvporcupine-3.0.5-py3-none-any.whl.metadata (5.0 kB)
+Downloading pvporcupine-3.0.5-py3-none-any.whl (2.5 MB)
+   ---------------------------------------- 2.5/2.5 MB 28.0 MB/s  0:00:00
+Installing collected packages: pvporcupine
+Successfully installed pvporcupine-3.0.5

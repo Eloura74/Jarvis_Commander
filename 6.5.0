@@ -1,0 +1,3 @@
+Requirement already satisfied: PySide6-Addons in a:\dev\jarvis_commander\venv\lib\site-packages (6.10.0)
+Requirement already satisfied: shiboken6==6.10.0 in a:\dev\jarvis_commander\venv\lib\site-packages (from PySide6-Addons) (6.10.0)
+Requirement already satisfied: PySide6_Essentials==6.10.0 in a:\dev\jarvis_commander\venv\lib\site-packages (from PySide6-Addons) (6.10.0)

@@ -1,0 +1,174 @@
+================================================================================
+                    JARVIS COMMANDER - AIDE-MÉMOIRE RAPIDE
+================================================================================
+
+📋 COMMANDES WINDOWS
+────────────────────────────────────────────────────────────────────────────
+
+Installation (première fois):
+    > setup.bat
+
+Lancer Jarvis:
+    > start_jarvis.bat
+
+Test installation:
+    > python test_installation.py
+
+Activer environnement virtuel (manuel):
+    > venv\Scripts\activate
+
+Lancer manuellement:
+    > python main.py
+
+
+================================================================================
+🗣️  COMMANDES VOCALES LES PLUS UTILES
+================================================================================
+
+Wake word:
+    "Jarvis"
+
+Applications:
+    "Ouvre Chrome"
+    "Ouvre la calculatrice"
+    "Ouvre le bloc-notes"
+    "Ferme Chrome"
+    "Ferme la fenêtre active"
+
+Recherche:
+    "Recherche Python tutorial"
+    "Cherche Arduino Uno"
+    "Google NVIDIA RTX 3060"
+
+Navigation:
+    "Scroll vers le bas"
+    "Scroll vers le haut"
+
+Dictée:
+    "Dicte Bonjour tout le monde"
+    "Écris mon email test@example.com"
+
+Fichiers:
+    "Recherche sur le disque A les fichiers .stl"
+    "Cherche robot sur le disque C"
+
+
+================================================================================
+⚙️  CONFIGURATION RAPIDE
+================================================================================
+
+Fichier config:
+    config\config.yaml
+
+Clé API Picovoice:
+    1. https://console.picovoice.ai/
+    2. Créer compte gratuit
+    3. Copier Access Key
+    4. Coller dans config.yaml → wake_word.access_key
+
+Ajouter une application:
+    1. Ouvrir config\config.yaml
+    2. Section "applications:"
+    3. Ajouter: mon_app: "C:\Chemin\vers\app.exe"
+    4. Redémarrer Jarvis
+    5. Dire: "Jarvis, ouvre mon app"
+
+Trouver chemin d'une app:
+    1. Clic droit sur raccourci
+    2. Propriétés
+    3. Copier "Cible"
+
+
+================================================================================
+🐛 DÉPANNAGE RAPIDE
+================================================================================
+
+Wake word ne fonctionne pas:
+    → Vérifier clé API dans config.yaml
+    → Augmenter sensibilité (Paramètres → 0.9)
+    → Vérifier micro dans Windows
+
+Whisper trop lent:
+    → Paramètres → Modèle → "tiny"
+    → Installer PyTorch CUDA pour GPU
+
+Application non trouvée:
+    → Vérifier chemin dans config.yaml
+    → Tester chemin dans explorateur Windows
+    → Utiliser %USERNAME% si dans dossier utilisateur
+
+Pas de son TTS:
+    → Vérifier volume Windows
+    → Paramètres Jarvis → Volume → 1.0
+    → Vérifier haut-parleurs
+
+
+================================================================================
+📁 FICHIERS IMPORTANTS
+================================================================================
+
+Logs du jour:
+    logs\jarvis_YYYYMMDD.log
+
+Configuration:
+    config\config.yaml
+
+Documentation:
+    README.md           → Doc complète
+    QUICKSTART.md       → Démarrage rapide
+    COMMANDES.md        → Liste commandes vocales
+    EXEMPLE_FLUX.md     → Flux détaillé
+
+
+================================================================================
+🔑 RACCOURCIS CLAVIER (dans l'interface)
+================================================================================
+
+Alt+F4              → Fermer Jarvis
+F5                  → Rafraîchir (si implémenté)
+
+
+================================================================================
+💡 ASTUCES
+================================================================================
+
+✓ Parlez distinctement, pas trop vite
+✓ Attendez le "Oui ?" avant de parler
+✓ Utilisez NVIDIA Broadcast si vous avez une RTX
+✓ Consultez les logs en cas de problème
+✓ Testez d'abord avec la calculatrice (pas de config)
+✓ Ajoutez vos apps fréquentes dans config.yaml
+
+
+================================================================================
+🚀 LANCEMENT RAPIDE (4 étapes)
+================================================================================
+
+1. Obtenir clé API Picovoice (2 min)
+   https://console.picovoice.ai/
+
+2. Installer (3 min)
+   > setup.bat
+
+3. Configurer clé API (30 sec)
+   Éditer config\config.yaml
+
+4. Lancer (10 sec)
+   > start_jarvis.bat
+   Cliquer "Activer Jarvis"
+   Dire "Jarvis" puis "Ouvre la calculatrice"
+
+
+================================================================================
+📞 SUPPORT
+================================================================================
+
+Logs:           logs\jarvis_YYYYMMDD.log
+Journal UI:     Onglet "Journal" dans l'interface
+Doc complète:   README.md
+Test:           python test_installation.py
+
+
+================================================================================
+                              Bon usage ! 🤖
+================================================================================

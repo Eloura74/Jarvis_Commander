@@ -1,0 +1,155 @@
+# Configuration optimisée de Jarvis Commander
+# Avec alias multiples pour reconnaissance vocale
+
+# Applications disponibles avec leurs chemins d'exécution
+applications:
+  # ========== NAVIGATEURS ==========
+  chrome: "C:\\Users\\faber\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe"
+  navigateur: "C:\\Users\\faber\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe"
+  google: "C:\\Users\\faber\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe"
+  
+  opera: "C:\\Users\\faber\\AppData\\Local\\Programs\\Opera\\opera.exe"
+  opéra: "C:\\Users\\faber\\AppData\\Local\\Programs\\Opera\\opera.exe"
+  
+  # ========== IMPRESSION 3D ==========
+  bambu_studio: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  bambu: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  bambou: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  bamboo: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  studio: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  impression: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  
+  # ========== CAO / DESIGN ==========
+  fusion_360: "C:\\Users\\faber\\AppData\\Local\\Autodesk\\webdeploy\\production\\6a0c9611291d45bb9226980209917c3d\\FusionLauncher.exe"
+  fusion: "C:\\Users\\faber\\AppData\\Local\\Autodesk\\webdeploy\\production\\6a0c9611291d45bb9226980209917c3d\\FusionLauncher.exe"
+  cad: "C:\\Users\\faber\\AppData\\Local\\Autodesk\\webdeploy\\production\\6a0c9611291d45bb9226980209917c3d\\FusionLauncher.exe"
+  autodesk: "C:\\Users\\faber\\AppData\\Local\\Autodesk\\webdeploy\\production\\6a0c9611291d45bb9226980209917c3d\\FusionLauncher.exe"
+  design: "C:\\Users\\faber\\AppData\\Local\\Autodesk\\webdeploy\\production\\6a0c9611291d45bb9226980209917c3d\\FusionLauncher.exe"
+  
+  # ========== FTP ==========
+  filezilla: "A:\\Logiciels\\FilleZilla\\FileZilla FTP Client\\filezilla.exe"
+  ftp: "A:\\Logiciels\\FilleZilla\\FileZilla FTP Client\\filezilla.exe"
+  
+  # ========== DÉVELOPPEMENT ==========
+  windsurf: "A:\\Logiciels\\Windsurf\\Windsurf.exe"
+  éditeur: "A:\\Logiciels\\Windsurf\\Windsurf.exe"
+  editeur: "A:\\Logiciels\\Windsurf\\Windsurf.exe"
+  code: "A:\\Logiciels\\Windsurf\\Windsurf.exe"
+  ide: "A:\\Logiciels\\Windsurf\\Windsurf.exe"
+  
+  # ========== IA / RECHERCHE ==========
+  comete: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  comet: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  comète: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  perplexity: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  recherche: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  
+  # ========== APPLICATIONS WINDOWS ==========
+  notepad: "notepad.exe"
+  bloc-notes: "notepad.exe"
+  notes: "notepad.exe"
+  
+  explorer: "explorer.exe"
+  explorateur: "explorer.exe"
+  fichiers: "explorer.exe"
+  
+  calculator: "calc.exe"
+  calculatrice: "calc.exe"
+  calcul: "calc.exe"
+  calc: "calc.exe"
+
+
+# Synonymes pour les noms d'applications (optionnel - déjà dans applications ci-dessus)
+app_aliases:
+  navigateur: chrome
+  calculette: calculator
+  explorateur: explorer
+
+
+# Paramètres audio
+audio:
+  # Index du périphérique d'entrée (None = défaut système)
+  input_device_index: null
+  
+  # Seuil de détection du silence (en dB, plus bas = plus sensible)
+  silence_threshold: -40
+  
+  # Durée d'enregistrement max après wake word (secondes)
+  max_record_duration: 10
+  
+  # Durée de silence pour terminer l'enregistrement (secondes)
+  silence_duration: 1.5
+  
+  # Sample rate
+  sample_rate: 16000
+
+
+# Paramètres Wake Word (Porcupine)
+wake_word:
+  # Sensibilité (0.0 à 1.0, plus haut = plus sensible mais plus de faux positifs)
+  sensitivity: 0.7
+  
+  # Clé API Picovoice (obtenir gratuitement sur https://console.picovoice.ai/)
+  access_key: "gpeIxb6iDOSZ+BGAjUHplXTomhVHFbdIDV1KApD/t3AM7/7P+oCvEA=="
+
+
+# Paramètres STT (Whisper)
+stt:
+  # Modèle Whisper : tiny, base, small, medium, large
+  # Recommandé: small ou medium pour bon compromis vitesse/précision
+  model: "small"
+  
+  # Langue (fr pour français)
+  language: "fr"
+  
+  # Utiliser GPU si disponible (désactivé car CUDA incomplet)
+  use_gpu: false
+  
+  # Compute type pour faster-whisper (float16 pour GPU, int8 pour CPU)
+  compute_type: "int8"
+
+
+# Paramètres TTS
+tts:
+  # Vitesse de parole (mots par minute)
+  rate: 180
+  
+  # Volume (0.0 à 1.0)
+  volume: 0.9
+  
+  # Voix (null = voix par défaut du système)
+  voice: null
+
+
+# Paramètres de recherche de fichiers
+file_search:
+  # Lecteurs à rechercher par défaut (laissez vide pour tous)
+  default_drives: ["A:\\", "C:\\"]
+  
+  # Extensions courantes par catégorie
+  extensions:
+    images: [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg"]
+    documents: [".pdf", ".doc", ".docx", ".txt", ".odt"]
+    models_3d: [".stl", ".obj", ".3mf", ".step", ".stp"]
+    code: [".py", ".js", ".html", ".css", ".cpp", ".h"]
+    
+# Paramètres de l'interface
+ui:
+  # Thème (dark ou light)
+  theme: "dark"
+  
+  # Taille de la fenêtre par défaut
+  window_width: 800
+  window_height: 600
+  
+  # Nombre max de lignes dans le journal
+  max_log_lines: 100
+
+
+# Paramètres de logging
+logging:
+  # Niveau de log (DEBUG, INFO, WARNING, ERROR)
+  level: "INFO"
+  
+  # Garder les logs pendant X jours
+  retention_days: 30
