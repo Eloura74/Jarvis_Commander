@@ -15,9 +15,14 @@ applications:
   calculator: "calc.exe"
 
 # Synonymes pour les noms d'applications (optionnel)
+# Utilisez des alias pour mapper plusieurs façons de dire la même chose
+# Conseil : Ajoutez des variations phonétiques pour améliorer la reconnaissance vocale
 app_aliases:
   navigateur: chrome
   calculatrice: calculator
+  calculette: calculator
+  calcul: calculator
+  recalculate: calculator  # Erreur de transcription courante
   explorateur: explorer
   bloc-notes: notepad
   vs code: vscode
@@ -32,10 +37,14 @@ audio:
   silence_threshold: -40
   
   # Durée d'enregistrement max après wake word (secondes)
-  max_record_duration: 10
+  # Valeur optimisée : 8s suffit pour la plupart des commandes courtes
+  max_record_duration: 8
   
   # Durée de silence pour terminer l'enregistrement (secondes)
-  silence_duration: 1.5
+  # OPTIMISÉ POUR VITESSE : Réduit de 1.5s à 0.8s
+  # 0.8s = bon équilibre entre vitesse et éviter de couper la parole
+  # Si vos commandes sont coupées, augmentez progressivement (0.9, 1.0, 1.2)
+  silence_duration: 0.8
   
   # Sample rate
   sample_rate: 16000

@@ -125,7 +125,8 @@ class JarvisController(QObject):
         
         # 3. Intent Parser
         app_aliases = self.config.get('app_aliases', {})
-        self.intent_parser = IntentParser(app_aliases)
+        app_paths = self.config.get('applications', {})
+        self.intent_parser = IntentParser(app_aliases, app_paths)
         self._emit_log("Parseur d'intentions initialisé", "INFO")
         
         # 4. System Controller

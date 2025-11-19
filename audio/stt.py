@@ -102,6 +102,7 @@ class STTEngine:
     ) -> Optional[np.ndarray]:
         """
         Enregistre l'audio depuis le micro jusqu'à détection de silence ou durée max.
+        Optimisé pour réduire la latence avec détection intelligente de fin de parole.
         
         Args:
             device_index: Index du périphérique d'entrée (None = défaut)
@@ -119,9 +120,13 @@ class STTEngine:
             silent_count = 0
             total_samples = 0
             
+            # Détection adaptative : besoin d'au moins 0.5s de parole avant de détecter le silence
+            min_speech_samples = int(0.5 * self.sample_rate)
+            has_speech = False
+            
             # Callback pour capturer l'audio
             def audio_callback(indata, frames, time, status):
-                nonlocal silent_count, total_samples
+                nonlocal silent_count, total_samples, has_speech
                 
                 if status:
                     logger.warning(f"Status audio : {status}")
@@ -133,10 +138,14 @@ class STTEngine:
                 # Vérifier le niveau audio (RMS)
                 rms = np.sqrt(np.mean(indata**2))
                 
-                if rms < self.silence_threshold:
-                    silent_count += len(indata)
-                else:
+                # Détecter si on a de la parole
+                if rms >= self.silence_threshold:
+                    has_speech = True
                     silent_count = 0
+                elif has_speech and total_samples >= min_speech_samples:
+                    # Ne compter le silence qu'après avoir détecté de la parole
+                    silent_count += len(indata)
+                # Sinon, on continue d'attendre la parole
             
             # Démarrer l'enregistrement
             with sd.InputStream(
@@ -148,7 +157,7 @@ class STTEngine:
             ):
                 # Attendre jusqu'à silence ou durée max
                 while silent_count < silence_samples and total_samples < max_samples:
-                    sd.sleep(100)  # Vérifier toutes les 100ms
+                    sd.sleep(50)  # Vérifier toutes les 50ms (réduit de 100ms pour plus de réactivité)
             
             # Concaténer les buffers
             if audio_buffer:
@@ -199,12 +208,27 @@ class STTEngine:
             
             logger.info("Transcription en cours...")
             
-            # Transcrire avec Whisper
+            # Prompt initial pour guider la reconnaissance vers les commandes vocales françaises
+            initial_prompt = (
+                "Ouvre calculatrice, ferme navigateur, recherche fichier, "
+                "lance Chrome, démarre Firefox, ouvre explorateur, "
+                "cherche sur le web, scroll down, scroll up."
+            )
+            
+            # Transcrire avec Whisper (optimisé pour vitesse)
             segments, info = self.model.transcribe(
                 tmp_path,
                 language=self.language,
-                beam_size=5,
-                vad_filter=False  # VAD désactivé pour éviter de filtrer la voix
+                beam_size=3,  # Réduit de 5 à 3 pour vitesse (bon compromis)
+                best_of=3,  # Réduit aussi (était implicitement 5)
+                temperature=0.0,  # Greedy decoding = plus rapide
+                vad_filter=True,  # VAD activé pour détecter rapidement la fin
+                vad_parameters=dict(
+                    threshold=0.4,  # Seuil VAD adapté
+                    min_silence_duration_ms=300  # 300ms de silence pour couper (vs 500ms par défaut)
+                ),
+                initial_prompt=initial_prompt,  # Guide la reconnaissance vocale
+                condition_on_previous_text=False  # Évite dépendance contexte = plus rapide
             )
             
             # Extraire le texte

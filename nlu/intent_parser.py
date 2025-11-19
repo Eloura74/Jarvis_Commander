@@ -6,6 +6,7 @@ Analyse les commandes vocales et extrait les intentions + paramètres.
 import re
 import logging
 from typing import Dict, Any, Optional, List
+from difflib import get_close_matches
 
 logger = logging.getLogger(__name__)
 
@@ -13,14 +14,32 @@ logger = logging.getLogger(__name__)
 class IntentParser:
     """Analyseur d'intentions basé sur des règles."""
     
-    def __init__(self, app_aliases: Optional[Dict[str, str]] = None):
+    def __init__(self, app_aliases: Optional[Dict[str, str]] = None, app_paths: Optional[Dict[str, str]] = None):
         """
         Initialise le parseur d'intentions.
         
         Args:
             app_aliases: Dictionnaire des alias d'applications (ex: {"navigateur": "chrome"})
+            app_paths: Dictionnaire des chemins d'applications (pour fuzzy matching)
         """
         self.app_aliases = app_aliases or {}
+        self.app_paths = app_paths or {}
+        
+        # Corrections communes de transcription (erreurs fréquentes de Whisper)
+        self.transcription_corrections = {
+            'recalculate': 'calculatrice',
+            'recalculatrice': 'calculatrice',
+            'calculette': 'calculatrice',
+            'calcul': 'calculatrice',
+            'calculate': 'calculatrice',
+            'chrome': 'chrome',
+            'crom': 'chrome',
+            'navigateur': 'navigateur',
+            'navigater': 'navigateur',
+            'explorateur': 'explorateur',
+            'explorer': 'explorateur',
+            'explorate': 'explorateur',
+        }
         
         # Patterns pour chaque type d'intention
         self.patterns = {
@@ -61,6 +80,68 @@ class IntentParser:
             ],
         }
     
+    def _correct_transcription_errors(self, texte: str) -> str:
+        """
+        Corrige les erreurs courantes de transcription.
+        
+        Args:
+            texte: Texte potentiellement erroné
+            
+        Returns:
+            Texte corrigé
+        """
+        words = texte.split()
+        corrected_words = []
+        
+        for word in words:
+            # Vérifier si le mot a une correction connue
+            if word in self.transcription_corrections:
+                corrected_words.append(self.transcription_corrections[word])
+                logger.debug(f"Correction : '{word}' -> '{self.transcription_corrections[word]}'")
+            else:
+                corrected_words.append(word)
+        
+        return ' '.join(corrected_words)
+    
+    def _resolve_app_name(self, app_name: str) -> str:
+        """
+        Résout le nom d'une application avec fuzzy matching.
+        
+        Args:
+            app_name: Nom brut de l'application
+            
+        Returns:
+            Nom résolu de l'application
+        """
+        # 1. Vérifier d'abord les alias exacts
+        if app_name in self.app_aliases:
+            resolved = self.app_aliases[app_name]
+            logger.debug(f"Alias trouvé : '{app_name}' -> '{resolved}'")
+            return resolved
+        
+        # 2. Vérifier si le nom existe directement dans les applications
+        if app_name in self.app_paths:
+            return app_name
+        
+        # 3. Fuzzy matching avec les noms d'applications et alias disponibles
+        all_possible_names = list(self.app_paths.keys()) + list(self.app_aliases.keys())
+        matches = get_close_matches(app_name, all_possible_names, n=1, cutoff=0.6)
+        
+        if matches:
+            match = matches[0]
+            # Si c'est un alias, résoudre
+            if match in self.app_aliases:
+                resolved = self.app_aliases[match]
+                logger.info(f"Fuzzy match via alias : '{app_name}' -> '{match}' -> '{resolved}'")
+                return resolved
+            else:
+                logger.info(f"Fuzzy match : '{app_name}' -> '{match}'")
+                return match
+        
+        # 4. Aucune correspondance, retourner le nom original
+        logger.debug(f"Aucune correspondance pour : '{app_name}'")
+        return app_name
+    
     def parse(self, texte: str) -> Dict[str, Any]:
         """
         Analyse le texte et extrait l'intention + paramètres.
@@ -79,6 +160,9 @@ class IntentParser:
         
         # Supprimer la ponctuation finale
         texte = re.sub(r'[.!?]+$', '', texte)
+        
+        # Corriger les erreurs de transcription courantes
+        texte = self._correct_transcription_errors(texte)
         
         logger.info(f"Analyse de l'intention : '{texte}'")
         
@@ -120,13 +204,14 @@ class IntentParser:
         
         if intent == 'open_app':
             app_name = match.group(1).strip()
-            # Résoudre les alias
-            app_name = self.app_aliases.get(app_name, app_name)
+            # Résoudre les alias et fuzzy matching
+            app_name = self._resolve_app_name(app_name)
             params['app_name'] = app_name
             
         elif intent == 'close_app':
             app_name = match.group(1).strip()
-            app_name = self.app_aliases.get(app_name, app_name)
+            # Résoudre les alias et fuzzy matching
+            app_name = self._resolve_app_name(app_name)
             params['app_name'] = app_name
             
         elif intent == 'web_search':
