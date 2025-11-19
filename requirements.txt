@@ -1,5 +1,6 @@
 # ========================================
 # Jarvis Commander - Dépendances Python
+# Toutes les dépendances sont GRATUITES et open source
 # ========================================
 
 # Interface graphique
@@ -10,10 +11,10 @@ PySide6-Addons>=6.5.0
 sounddevice>=0.4.6
 numpy>=1.24.0
 
-# Wake Word Detection (Picovoice Porcupine)
+# Wake Word Detection (Picovoice Porcupine - Version gratuite)
 pvporcupine>=3.0.0
 
-# Speech-to-Text (Whisper)
+# Speech-to-Text (Whisper - OpenAI open source)
 faster-whisper>=0.9.0
 # Pour CUDA (optionnel si GPU NVIDIA disponible)
 # torch>=2.0.0  # Décommentez si vous utilisez GPU
@@ -30,3 +31,17 @@ PyYAML>=6.0
 
 # Utilitaires
 pathlib>=1.0.1
+
+# === NOUVELLES DÉPENDANCES POUR OPTIMISATION ===
+
+# Voice Activity Detection (VAD) - Open source Google
+webrtcvad>=2.0.10
+
+# Réduction de bruit - Open source
+noisereduce>=3.0.0
+
+# Traitement audio avancé - Open source
+scipy>=1.10.0
+
+# Détection des périphériques audio
+pyaudio>=0.2.13

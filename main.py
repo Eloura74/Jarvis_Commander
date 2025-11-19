@@ -85,12 +85,24 @@ class JarvisController(QObject):
             self.logger.info(f"Configuration chargée depuis {self.config_path}")
         except Exception as e:
             self.logger.error(f"Erreur lors du chargement de la config : {e}")
-            # Configuration par défaut minimale
+            # Configuration par défaut minimale OPTIMISÉE
             self.config = {
                 'applications': {},
-                'audio': {'sample_rate': 16000},
+                'audio': {
+                    'sample_rate': 16000,
+                    'silence_threshold': 0.01,
+                    'silence_duration': 0.8,  # Optimisé pour réactivité
+                    'max_record_duration': 8.0  # Optimisé pour commandes courtes
+                },
                 'wake_word': {'sensitivity': 0.7, 'access_key': ''},
-                'stt': {'model': 'small', 'language': 'fr', 'use_gpu': True, 'compute_type': 'float16'},
+                'stt': {
+                    'model': 'tiny',  # Optimisé pour vitesse
+                    'language': 'fr',
+                    'use_gpu': False,  # CUDA incomplet
+                    'compute_type': 'int8',  # CPU optimisé
+                    'enable_noise_reduction': True,  # Filtre le bruit
+                    'enable_vad': True  # Détection de voix
+                },
                 'tts': {'rate': 180, 'volume': 0.9},
                 'logging': {'level': 'INFO'}
             }
@@ -108,20 +120,22 @@ class JarvisController(QObject):
         )
         self._emit_log("Moteur TTS initialisé", "INFO")
         
-        # 2. STT Engine
+        # 2. STT Engine (avec nouvelles optimisations audio)
         stt_config = self.config.get('stt', {})
         audio_config = self.config.get('audio', {})
         self.stt_engine = STTEngine(
-            model_size=stt_config.get('model', 'small'),
+            model_size=stt_config.get('model', 'tiny'),  # Changé de 'small' à 'tiny' par défaut
             language=stt_config.get('language', 'fr'),
-            use_gpu=stt_config.get('use_gpu', True),
-            compute_type=stt_config.get('compute_type', 'float16'),
+            use_gpu=stt_config.get('use_gpu', False),  # Changé de True à False (CUDA incomplet)
+            compute_type=stt_config.get('compute_type', 'int8'),  # Changé de 'float16' à 'int8'
             sample_rate=audio_config.get('sample_rate', 16000),
             silence_threshold=audio_config.get('silence_threshold', 0.01),
-            silence_duration=audio_config.get('silence_duration', 1.5),
-            max_duration=audio_config.get('max_record_duration', 10.0)
+            silence_duration=audio_config.get('silence_duration', 0.8),  # Changé de 1.5 à 0.8
+            max_duration=audio_config.get('max_record_duration', 8.0),  # Changé de 10.0 à 8.0
+            enable_noise_reduction=stt_config.get('enable_noise_reduction', True),  # NOUVEAU
+            enable_vad=stt_config.get('enable_vad', True)  # NOUVEAU
         )
-        self._emit_log("Moteur STT initialisé", "INFO")
+        self._emit_log("Moteur STT initialisé (optimisé pour vitesse)", "INFO")
         
         # 3. Intent Parser
         app_aliases = self.config.get('app_aliases', {})
