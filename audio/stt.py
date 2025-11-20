@@ -78,7 +78,8 @@ class STTEngine:
         silence_duration: float = 0.8,  # Réduit de 1.5 à 0.8 pour réactivité
         max_duration: float = 8.0,  # Réduit de 10.0 à 8.0 pour commandes courtes
         enable_noise_reduction: bool = True,  # Nouveau : activer réduction de bruit
-        enable_vad: bool = True  # Nouveau : activer VAD
+        enable_vad: bool = True,  # Nouveau : activer VAD
+        calibration_duration: float = 0.6  # Nouveau : mesure du bruit ambiant
     ):
         """
         Initialise le moteur STT avec optimisations audio.
@@ -105,6 +106,9 @@ class STTEngine:
         self.max_duration = max_duration
         self.enable_noise_reduction = enable_noise_reduction and NOISE_REDUCE_AVAILABLE
         self.enable_vad = enable_vad and VAD_AVAILABLE
+        self.calibration_duration = calibration_duration
+        self.adaptive_silence_threshold = silence_threshold
+        self.ambient_rms = 0.0
         self.model = None
         
         # Initialiser le VAD si disponible (WebRTC VAD - Google open source)
@@ -275,10 +279,12 @@ class STTEngine:
         Returns:
             True si c'est de la parole, False si c'est du bruit/silence
         """
+        threshold = getattr(self, "adaptive_silence_threshold", self.silence_threshold)
+
         if not self.vad or len(audio_chunk) == 0:
             # Fallback sur détection RMS simple
             rms = np.sqrt(np.mean(audio_chunk**2))
-            return rms >= self.silence_threshold
+            return rms >= threshold
         
         try:
             # Convertir en int16 pour WebRTC VAD
@@ -292,7 +298,7 @@ class STTEngine:
             # Si le chunk est trop petit, utiliser RMS
             if len(audio_int16) < frame_length:
                 rms = np.sqrt(np.mean(audio_chunk**2))
-                return rms >= self.silence_threshold
+                return rms >= threshold
             
             # Analyser avec VAD
             audio_bytes = audio_int16[:frame_length].tobytes()
@@ -303,7 +309,68 @@ class STTEngine:
         except Exception as e:
             # Fallback sur RMS en cas d'erreur
             rms = np.sqrt(np.mean(audio_chunk**2))
-            return rms >= self.silence_threshold
+            return rms >= threshold
+
+    def _calibrate_noise_floor(self, device_index: Optional[int] = None) -> float:
+        """
+        Mesure le bruit ambiant pour ajuster dynamiquement le seuil de silence.
+
+        Une courte calibration permet d'éviter les faux positifs dans un environnement
+        bruyant et réduit le temps d'attente dans un environnement silencieux.
+        """
+        try:
+            logger.info("🎚️ Calibration du bruit ambiant...")
+            samples = int(self.calibration_duration * self.sample_rate)
+            ambient_audio = sd.rec(
+                samples,
+                samplerate=self.sample_rate,
+                channels=1,
+                dtype='float32',
+                device=device_index,
+            )
+            sd.wait()
+
+            if ambient_audio is None or len(ambient_audio) == 0:
+                return self.silence_threshold
+
+            self.ambient_rms = float(np.sqrt(np.mean(ambient_audio**2)))
+            # Ajuster légèrement le seuil pour ignorer le fond sonore tout en restant sensible
+            self.adaptive_silence_threshold = max(
+                self.silence_threshold,
+                self.ambient_rms * 2.5,
+            )
+            logger.info(
+                "   → Bruit détecté : %.4f | Seuil adaptatif : %.4f",
+                self.ambient_rms,
+                self.adaptive_silence_threshold,
+            )
+            return self.adaptive_silence_threshold
+
+        except Exception as e:
+            logger.warning(f"Calibration du bruit impossible : {e}")
+            self.adaptive_silence_threshold = self.silence_threshold
+            return self.silence_threshold
+
+    def _normalize_audio(self, audio_data: np.ndarray) -> np.ndarray:
+        """Applique une normalisation douce pour conserver une voix claire et stable."""
+        if audio_data.size == 0:
+            return audio_data
+
+        max_val = np.max(np.abs(audio_data))
+        if max_val == 0:
+            return audio_data
+
+        target_peak = 0.97
+        gain = target_peak / max_val
+        # Limiter le gain pour éviter un souffle trop fort
+        gain = min(gain, 3.0)
+        normalized = np.clip(audio_data * gain, -1.0, 1.0)
+        logger.debug(
+            "Normalisation audio | Gain %.2fx | Pic initial %.4f",
+            gain,
+            max_val,
+        )
+        return normalized
     
     def enregistrer_audio(
         self,
@@ -326,7 +393,10 @@ class STTEngine:
         """
         try:
             logger.info("🎙️ Début de l'enregistrement audio optimisé...")
-            
+
+            # Ajuster le seuil en fonction du bruit ambiant pour une détection robuste
+            self._calibrate_noise_floor(device_index)
+
             # Buffer pour stocker l'audio
             audio_buffer = []
             silence_samples = int(self.silence_duration * self.sample_rate)
@@ -382,15 +452,18 @@ class STTEngine:
                 
                 # Appliquer les filtres audio pour nettoyer le signal
                 logger.info("🔧 Application des filtres audio...")
-                
+
                 # 1. Filtre passe-bande (isoler les fréquences vocales 300-3400 Hz)
                 audio_data = self._apply_bandpass_filter(audio_data)
-                
+
                 # 2. Réduction de bruit (supprimer le film en fond)
                 audio_data = self._reduce_noise(audio_data)
-                
+
+                # 3. Normalisation douce pour un volume constant et intelligible
+                audio_data = self._normalize_audio(audio_data)
+
                 logger.info("✅ Filtrage audio terminé (voix isolée)")
-                
+
                 return audio_data
             else:
                 logger.warning("Aucun audio enregistré")

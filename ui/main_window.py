@@ -53,11 +53,15 @@ class JarvisMainWindow(QMainWindow):
         # === EN-TÊTE ===
         header = self._create_header()
         main_layout.addWidget(header)
-        
+
         # === INDICATEUR D'ÉTAT ===
         status_group = self._create_status_indicator()
         main_layout.addWidget(status_group)
-        
+
+        # === BARRE DE CAPACITÉS ===
+        capability_bar = self._create_capability_bar()
+        main_layout.addWidget(capability_bar)
+
         # === ONGLETS ===
         tabs = QTabWidget()
         tabs.setFont(QFont("Segoe UI", 10))
@@ -103,7 +107,7 @@ class JarvisMainWindow(QMainWindow):
         """Crée l'indicateur d'état."""
         group = QGroupBox("État du système")
         group.setFont(QFont("Segoe UI", 11, QFont.Bold))
-        
+
         layout = QHBoxLayout(group)
         
         # Label d'état
@@ -112,8 +116,31 @@ class JarvisMainWindow(QMainWindow):
         self.status_label.setAlignment(Qt.AlignCenter)
         
         layout.addWidget(self.status_label)
-        
+
         return group
+
+    def _create_capability_bar(self) -> QWidget:
+        """Affiche des badges rapides sur l'état des protections et performances."""
+        bar = QWidget()
+        layout = QHBoxLayout(bar)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+
+        self.capability_labels = {
+            'fluid': QLabel("⚡ Mode fluide"),
+            'noise': QLabel("🛡️ Anti-bruit"),
+            'wake_word': QLabel("🎯 Wake word"),
+            'gpu': QLabel("🧠 GPU"),
+        }
+
+        for label in self.capability_labels.values():
+            label.setAlignment(Qt.AlignCenter)
+            label.setFont(QFont("Segoe UI", 9, QFont.Bold))
+            label.setStyleSheet(self._capability_style(active=False))
+            layout.addWidget(label)
+
+        layout.addStretch()
+        return bar
     
     def _create_log_tab(self) -> QWidget:
         """Crée l'onglet du journal."""
@@ -372,9 +399,51 @@ class JarvisMainWindow(QMainWindow):
         }
         
         emoji, text, color = status_map.get(status, ('⚪', status, '#888'))
-        
+
         self.status_label.setText(f"{emoji} {text}")
         self.status_label.setStyleSheet(f"color: {color};")
+
+    def _capability_style(self, active: bool) -> str:
+        """Style commun pour les badges de statut."""
+        if active:
+            background = "#1f6feb"
+            foreground = "white"
+        else:
+            background = "#2d2d2d"
+            foreground = "#888"
+
+        return (
+            "background: "
+            + background
+            + "; color: "
+            + foreground
+            + "; padding: 6px 10px; border-radius: 12px; border: 1px solid #3e3e3e;"
+        )
+
+    def update_capabilities(self, capabilities: dict):
+        """Met à jour l'état des badges (anti-bruit, fluidité, GPU, wake word)."""
+        mapping = {
+            'fluid': capabilities.get('fast_mode', False),
+            'noise': capabilities.get('noise_reduction', False) or capabilities.get('vad', False),
+            'wake_word': capabilities.get('wake_word', False),
+            'gpu': capabilities.get('gpu', False),
+        }
+
+        titles = {
+            'fluid': '⚡ Mode fluide',
+            'noise': '🛡️ Anti-bruit',
+            'wake_word': '🎯 Wake word',
+            'gpu': '🧠 GPU',
+        }
+
+        for key, active in mapping.items():
+            if key not in self.capability_labels:
+                continue
+            label = self.capability_labels[key]
+            label.setStyleSheet(self._capability_style(active=bool(active)))
+            suffix = "activé" if active else "désactivé"
+            base = titles.get(key, label.text())
+            label.setText(f"{base} · {suffix}")
     
     @Slot()
     def _apply_settings(self):

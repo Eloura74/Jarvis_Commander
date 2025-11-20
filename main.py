@@ -356,13 +356,30 @@ class JarvisController(QObject):
     def set_window(self, window: JarvisMainWindow):
         """Associe la fenêtre principale."""
         self.window = window
-        
+
         # Connecter les signaux
         self.log_signal.connect(window.add_log)
         self.status_signal.connect(window.set_status)
-        
+
         # Connecter le bouton toggle
         window.toggle_btn.clicked.connect(self._toggle_jarvis)
+
+        # Mettre à jour les badges de capacités (anti-bruit, GPU...)
+        try:
+            window.update_capabilities(self._capabilities_data())
+        except Exception:
+            self.logger.debug("Impossible de mettre à jour les capacités UI", exc_info=True)
+
+    def _capabilities_data(self) -> Dict[str, Any]:
+        """Construit un snapshot des optimisations actives pour l'UI."""
+        stt = self.stt_engine
+        return {
+            'noise_reduction': bool(stt and stt.enable_noise_reduction),
+            'vad': bool(stt and stt.enable_vad),
+            'fast_mode': bool(stt and stt.model_size in {"tiny", "base"}),
+            'gpu': bool(stt and stt.use_gpu and stt.compute_type != "int8"),
+            'wake_word': bool(self.wake_word_detector),
+        }
     
     @Slot()
     def _toggle_jarvis(self):
