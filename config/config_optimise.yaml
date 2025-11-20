@@ -68,11 +68,17 @@ app_aliases:
 
 # Paramètres audio
 audio:
-  # Index du périphérique d'entrée (None = défaut système)
-  input_device_index: null
+  # Index du périphérique d'entrée
+  # null = défaut système (peut ne pas être NVIDIA Broadcast)
+  # Pour forcer NVIDIA Broadcast :
+  # 1. Exécute : python detecter_micros.py
+  # 2. Note l'index de "Microphone (NVIDIA Broadcast)"
+  # 3. Remplace null par ce numéro (exemple : 2)
+  input_device_index: null  # À CHANGER AVEC L'INDEX DÉTECTÉ
   
-  # Seuil de détection du silence (en dB, plus bas = plus sensible)
-  silence_threshold: -40
+  # Seuil de détection du silence (amplitude RMS, 0.0 à 1.0)
+  # 0.01 = standard, 0.02 = moins sensible (meilleur avec film en fond)
+  silence_threshold: 0.02
   
   # Durée d'enregistrement max après wake word (secondes)
   # Valeur optimisée : 8s suffit pour la plupart des commandes courtes
@@ -100,7 +106,8 @@ wake_word:
 # Paramètres STT (Whisper)
 stt:
   # Modèle Whisper : tiny, base, small, medium, large
-  # Recommandé: small ou medium pour bon compromis vitesse/précision
+  # tiny = <1s (rapide mais peut confondre des mots rares)
+  # small = 2-3s (plus précis, recommandé si tiny se trompe)
   model: "small"
   
   # Langue (fr pour français)
