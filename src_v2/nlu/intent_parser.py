@@ -93,6 +93,8 @@ class IntentParser:
                 r'(?:ouvrir|lancer)\s+l\'application\s+(.+)',
                 r'(?:c\'est|cest|met|mets)\s+(?:le\s+|la\s+)?(.+)', # "C'est le Chrome"
                 r'(?:je\s+veux)\s+(?:lancer\s+|ouvrir\s+)?(.+)',
+                r'(?:peux-tu|peux\s+tu|pourrais-tu|pourrais\s+tu)\s+(?:ouvrir|lancer|démarrer)\s+(.+)',
+                r'(?:lance|ouvre)\s+(?:moi\s+)?(.+)',
                 r'^([a-zA-Z0-9\s]+)$', # Nom d'app direct (ex: "Chrome") - TRÈS GÉNÉRIQUE, DOIT ÊTRE EN DERNIER
             ],
         }

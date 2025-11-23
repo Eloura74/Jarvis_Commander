@@ -94,30 +94,31 @@ RÈGLES :
         import json
         import re
         
-        prompt = f"""[INST] Tu es un analyseur d'intentions pour un assistant vocal.
-Ton but est de convertir une phrase utilisateur en commande structurée JSON.
+        prompt = f"""[INST] Tu es le cerveau analytique de Jarvis.
+Ton objectif est de comprendre l'intention de l'utilisateur et de la convertir en une commande JSON structurée.
 
-INTENTIONS POSSIBLES :
-- web_search : pour faire une recherche sur internet (param: query)
-- open_app : pour ouvrir un logiciel (param: app_name)
-- close_app : pour fermer un logiciel (param: app_name)
-- scroll_down : pour descendre dans une page
-- scroll_up : pour monter dans une page
-- small_talk : pour la conversation (param: type=greeting|thanks|goodbye|unknown)
-- unknown : si aucune intention ne correspond
+INTENTIONS DISPONIBLES :
+- open_app : Ouvrir un logiciel/application (param: app_name). Ex: "Lance Photoshop", "Ouvre le truc pour coder".
+- close_app : Fermer un logiciel (param: app_name). Ex: "Ferme Discord".
+- web_search : Recherche internet (param: query). Ex: "Qui est Elon Musk ?", "Cherche une recette de crêpes".
+- file_search : Recherche de fichiers (param: query, drive, extension). Ex: "Trouve mon CV.pdf", "Cherche les photos sur le disque D".
+- scroll_down / scroll_up : Défilement (param: amount). Ex: "Descends", "Monte un peu".
+- small_talk : Conversation (param: type=greeting|thanks|goodbye|status|unknown).
+- unknown : Si tu ne comprends vraiment pas ou si c'est une question générale qui nécessite une réponse verbale.
 
-RÈGLES :
-1. Réponds UNIQUEMENT avec le JSON valide.
-2. Pas de blabla avant ou après.
-3. Si c'est ambigu, choisis l'intention la plus probable.
+RÈGLES CRITIQUES :
+1. Réponds UNIQUEMENT avec un JSON valide. RIEN D'AUTRE.
+2. Si l'utilisateur demande d'ouvrir une app, essaie de deviner le nom officiel (ex: "le truc pour écrire" -> "Word" ou "Notepad").
+3. Si c'est une question de culture générale ("Quelle est la capitale de la France ?"), utilise l'intention "unknown" pour que je puisse répondre verbalement.
 
-Exemples :
-"Cherche météo Paris" -> {{"intent": "web_search", "parameters": {{"query": "météo Paris"}}}}
-"Ouvre Chrome" -> {{"intent": "open_app", "parameters": {{"app_name": "Chrome"}}}}
+EXEMPLES :
+"Lance Chrome s'il te plait" -> {{"intent": "open_app", "parameters": {{"app_name": "Chrome"}}}}
+"Fais une recherche sur les chats" -> {{"intent": "web_search", "parameters": {{"query": "les chats"}}}}
 "Descends un peu" -> {{"intent": "scroll_down", "parameters": {{}}}}
-"Bonjour" -> {{"intent": "small_talk", "parameters": {{"type": "greeting"}}}}
+"Bonjour Jarvis" -> {{"intent": "small_talk", "parameters": {{"type": "greeting"}}}}
+"C'est quoi le sens de la vie ?" -> {{"intent": "unknown", "parameters": {{"text": "C'est quoi le sens de la vie ?"}}}}
 
-Phrase à analyser : "{text}" [/INST]"""
+Phrase utilisateur : "{text}" [/INST]"""
 
         try:
             output = self.llm(

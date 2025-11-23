@@ -16,6 +16,7 @@ from audio.stt import STTEngine
 from audio.tts import TTSEngine
 from nlu.intent_parser import IntentParser
 from actions.system_control import SystemController
+from utils.app_indexer import AppIndexer
 # On garde config_manager pour l'UI mais on charge le yaml pour le backend
 from config_manager import config as ui_config
 
@@ -101,11 +102,24 @@ class JarvisController:
             self.ui.add_log("DÉTECTEUR WAKE WORD: OK", "SYS")
             
             # 4. NLU & Actions
+            # Indexation dynamique des apps
+            self.ui.add_log("INDEXATION DES APPLICATIONS...", "SYS")
+            app_indexer = AppIndexer()
+            # On le fait en synchrone ici pour l'instant, mais idéalement async
+            installed_apps = app_indexer.get_installed_apps()
+            self.ui.add_log(f"APPS INDEXÉES: {len(installed_apps)}", "SYS")
+            
+            # Fusion avec la config manuelle (la config manuelle est prioritaire pour les alias)
+            configured_apps = self.backend_config.get('applications', {})
+            # On fusionne : d'abord les installées, puis on écrase avec les configurées (pour garder les chemins custom si besoin)
+            all_apps = installed_apps.copy()
+            all_apps.update(configured_apps)
+            
             self.intent_parser = IntentParser(
                 self.backend_config.get('app_aliases', {}), 
-                self.backend_config.get('applications', {})
+                all_apps
             )
-            self.system_controller = SystemController(self.backend_config.get('applications', {}))
+            self.system_controller = SystemController(all_apps)
             self.ui.add_log("SYSTÈMES DE CONTRÔLE: OK", "SYS")
             
             self.ui.add_log("TOUS LES SYSTÈMES OPÉRATIONNELS", "SYS")
@@ -290,6 +304,9 @@ def main():
     
     # 3. Initialisation du Contrôleur Backend
     controller = JarvisController(jarvis_ui)
+    
+    # Connexion du contrôleur à l'UI pour les paramètres
+    jarvis_ui.set_controller(controller)
     
     # Hook sur le démarrage de l'UI pour lancer les composants
     async def on_startup():

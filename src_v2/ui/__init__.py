@@ -188,7 +188,9 @@ class JarvisUI:
         self.time_label = None
         self.date_label = None
         self.start_overlay = None
+        self.start_overlay = None
         self.reactor_core = None
+        self.controller = None # Référence au contrôleur principal
         
         # Configuration de l'app
         ui.add_head_html(f'<style>{THEME_CSS}</style>')
@@ -254,6 +256,8 @@ class JarvisUI:
                 with ui.column().classes('items-end'):
                     ui.label('CPU: 34% // TEMP: 45°C')
                     ui.label('MEM: 12GB // NET: SECURE')
+                with ui.button(icon='settings', on_click=self._show_settings_dialog).props('flat round dense').classes('text-cyan-400'):
+                    ui.tooltip('Paramètres Système')
                 ui.icon('hub', size='32px').classes('text-cyan-400 animate-spin-slow')
 
         # --- MAIN GRID ---
@@ -392,6 +396,70 @@ class JarvisUI:
         await asyncio.sleep(0.2)
         self.set_state("IDLE")
         ui.notify('SYSTEM READY', type='positive')
+
+    def set_controller(self, controller):
+        """Définit le contrôleur principal."""
+        self.controller = controller
+
+    def _show_settings_dialog(self):
+        """Affiche la modale de paramètres."""
+        if not self.controller:
+            ui.notify("Contrôleur non connecté", type='warning')
+            return
+
+        with ui.dialog() as dialog, ui.card().classes('bg-[#050510] border border-cyan-500/50 w-96'):
+            ui.label('CONFIGURATION SYSTÈME').classes('orbitron text-lg text-cyan-400 mb-4')
+            
+            # 1. Sélecteur de Voix
+            ui.label('Synthèse Vocale').classes('text-xs opacity-70')
+            voices = self.controller.tts_engine.get_available_voices() if self.controller.tts_engine else []
+            
+            if voices:
+                ui.select(
+                    options=voices, 
+                    value=self.controller.tts_engine.voice_id,
+                    label='Voix',
+                    on_change=lambda e: self.controller.tts_engine.set_voice(e.value)
+                ).classes('w-full mb-4').props('dark outlined')
+            else:
+                ui.label('Aucune voix détectée ou TTS non initialisé').classes('text-red-400 text-xs mb-4')
+            
+            # 2. Indexation Apps
+            ui.label('Applications').classes('text-xs opacity-70')
+            ui.label(f"Apps indexées : {len(self.controller.system_controller.app_paths) if self.controller.system_controller else 0}").classes('text-xs mb-2')
+            
+            def refresh_apps():
+                ui.notify("Ré-indexation lancée...", type='info')
+                # On lance l'indexation dans un thread pour ne pas bloquer
+                import threading
+                def run_index():
+                    from utils.app_indexer import AppIndexer
+                    indexer = AppIndexer()
+                    apps = indexer.get_installed_apps(force_refresh=True)
+                    
+                    # Mise à jour du contrôleur via queue thread-safe si possible, ou direct (attention)
+                    # Ici on le fait direct car c'est des dicts python (atomic operations mostly)
+                    if self.controller.system_controller:
+                        conf_apps = self.controller.backend_config.get('applications', {})
+                        all_apps = apps.copy()
+                        all_apps.update(conf_apps)
+                        self.controller.system_controller.set_app_paths(all_apps)
+                        if self.controller.intent_parser:
+                            self.controller.intent_parser.app_paths = all_apps
+                    
+                    self.add_log_threadsafe(f"INDEXATION TERMINÉE: {len(apps)} APPS", "SYS")
+                    self.run_threadsafe(lambda: ui.notify(f"Indexation terminée : {len(apps)} apps trouvées", type='positive'))
+                    self.run_threadsafe(dialog.close)
+                    
+                threading.Thread(target=run_index, daemon=True).start()
+
+            ui.button('Forcer Ré-indexation', on_click=refresh_apps, icon='refresh').props('outline').classes('w-full text-cyan-400 mb-4')
+            
+            # Footer
+            with ui.row().classes('w-full justify-end'):
+                ui.button('Fermer', on_click=dialog.close).props('flat text-color=white')
+            
+            dialog.open()
 
 def build(brain=None):
     return JarvisUI(brain)
