@@ -86,6 +86,62 @@ RÈGLES :
             
         return response
 
+    def analyze_intent(self, text):
+        """
+        Analyse l'intention avec le LLM si les regex ont échoué.
+        Retourne un dict {intent, parameters}.
+        """
+        import json
+        import re
+        
+        prompt = f"""[INST] Tu es un analyseur d'intentions pour un assistant vocal.
+Ton but est de convertir une phrase utilisateur en commande structurée JSON.
+
+INTENTIONS POSSIBLES :
+- web_search : pour faire une recherche sur internet (param: query)
+- open_app : pour ouvrir un logiciel (param: app_name)
+- close_app : pour fermer un logiciel (param: app_name)
+- scroll_down : pour descendre dans une page
+- scroll_up : pour monter dans une page
+- small_talk : pour la conversation (param: type=greeting|thanks|goodbye|unknown)
+- unknown : si aucune intention ne correspond
+
+RÈGLES :
+1. Réponds UNIQUEMENT avec le JSON valide.
+2. Pas de blabla avant ou après.
+3. Si c'est ambigu, choisis l'intention la plus probable.
+
+Exemples :
+"Cherche météo Paris" -> {{"intent": "web_search", "parameters": {{"query": "météo Paris"}}}}
+"Ouvre Chrome" -> {{"intent": "open_app", "parameters": {{"app_name": "Chrome"}}}}
+"Descends un peu" -> {{"intent": "scroll_down", "parameters": {{}}}}
+"Bonjour" -> {{"intent": "small_talk", "parameters": {{"type": "greeting"}}}}
+
+Phrase à analyser : "{text}" [/INST]"""
+
+        try:
+            output = self.llm(
+                prompt,
+                max_tokens=128,
+                stop=["</s>", "[/INST]"],
+                echo=False,
+                temperature=0.1 # Très déterministe
+            )
+            
+            response = output['choices'][0]['text'].strip()
+            
+            # Nettoyage pour extraire le JSON (au cas où le LLM bavarde)
+            json_match = re.search(r'\{.*\}', response, re.DOTALL)
+            if json_match:
+                json_str = json_match.group(0)
+                return json.loads(json_str)
+            else:
+                return {'intent': 'unknown', 'parameters': {}}
+                
+        except Exception as e:
+            print(f"Erreur analyse LLM : {e}")
+            return {'intent': 'unknown', 'parameters': {}}
+
 # Test rapide si exécuté directement
 if __name__ == "__main__":
     brain = Brain()

@@ -252,8 +252,21 @@ class JarvisController:
         else:
             # Fallback sur le Brain LLM si pas de commande système
             if self.ui.brain:
-                # On ne répond que si le brain est confiant ou si c'est une vraie question
-                # Pour l'instant on simplifie : on ne répond pas "Commande inconnue" vocalement
+                # 1. Tenter une analyse d'intention via LLM (Hybrid NLU)
+                # On ne le fait que si ce n'est pas déjà une récursion (pour éviter boucle infinie)
+                if params.get('source') != 'llm_fallback':
+                    self.ui.add_log_threadsafe("Réflexion autonome...", "AI")
+                    llm_intent = self.ui.brain.analyze_intent(params.get('text', ''))
+                    
+                    if llm_intent and llm_intent.get('intent') != 'unknown':
+                        logger.info(f"Intention trouvée par LLM : {llm_intent}")
+                        # Marquer comme venant du LLM pour éviter boucle
+                        llm_intent['parameters']['source'] = 'llm_fallback'
+                        # Récursion avec la nouvelle intention
+                        self._execute_action(llm_intent['intent'], llm_intent['parameters'])
+                        return
+
+                # 2. Si toujours inconnu, mode conversation (Chat)
                 response = self.ui.brain.think(params.get('text', '')) 
                 success = True
             else:

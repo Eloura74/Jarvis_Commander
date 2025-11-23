@@ -43,7 +43,7 @@ applications:
   comet: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
   comète: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
   perplexity: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
-  recherche: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  # 'recherche' supprimé pour éviter conflit avec la commande "Recherche..."
   web: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
   
   # ========== APPLICATIONS WINDOWS ==========

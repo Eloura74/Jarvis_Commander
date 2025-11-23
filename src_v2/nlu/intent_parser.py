@@ -34,6 +34,7 @@ class IntentParser:
             'calculate': 'calculatrice',
             'chrome': 'chrome',
             'crom': 'chrome',
+            'naviguateur': 'chrome',
             'navigateur': 'navigateur',
             'navigater': 'navigateur',
             'explorateur': 'explorateur',
@@ -45,23 +46,18 @@ class IntentParser:
         }
         
         # Patterns pour chaque type d'intention
+        # ORDRE IMPORTANT : Les intentions spécifiques doivent être avant les génériques (open_app)
         self.patterns = {
-            'open_app': [
-                r'(?:ouvre|lance|démarre|ouvrir|lancer|démarrer|exécute|exécuter)\s+(.+)',
-                r'(?:ouvrir|lancer)\s+l\'application\s+(.+)',
-                r'(?:c\'est|cest|met|mets)\s+(?:le\s+|la\s+)?(.+)', # "C'est le Chrome"
-                r'(?:je\s+veux)\s+(?:lancer\s+|ouvrir\s+)?(.+)',
-                r'^([a-zA-Z0-9\s]+)$', # Nom d'app direct (ex: "Chrome")
+            'web_search': [
+                r'(?:recherche|cherche|trouve|google|googler)\s+(?:sur\s+)?(?:le\s+)?(?:web\s+)?(?:sur\s+)?(?:internet\s+)?(.+)',
+                r'(?:fait|fais)\s+une\s+recherche\s+(?:web\s+)?(?:sur\s+)?(.+)',
+                r'(?:fait|fais)\s+une\s+recherche\s+(?:web\s+)?(?:de|pour)\s+(.+)',
+                r'(?:on\s+va\s+chercher|on\s+cherche)\s+(.+)', # "On va chercher..."
             ],
             'close_app': [
                 r'(?:ferme|quitte|arrête|fermer|quitter|arrêter|termine|terminer)\s+(.+)',
                 r'(?:fermer|quitter)\s+l\'application\s+(.+)',
                 r'(?:coupe)\s+(.+)',
-            ],
-            'web_search': [
-                r'(?:recherche|cherche|trouve|google|googler)\s+(?:sur\s+)?(?:le\s+)?(?:web\s+)?(?:sur\s+)?(?:internet\s+)?(.+)',
-                r'(?:fait|fais)\s+une\s+recherche\s+(?:web\s+)?(?:sur\s+)?(.+)',
-                r'(?:fait|fais)\s+une\s+recherche\s+(?:web\s+)?(?:de|pour)\s+(.+)',
             ],
             'scroll_down': [
                 r'(?:scroll|scrolle|défile|descends|descend)\s+(?:vers\s+)?(?:le\s+)?(?:bas|down)',
@@ -90,6 +86,14 @@ class IntentParser:
                 r'^(?:merci|c\'est\s+tout|cest\s+tout|stop|arrête|arrete)(?:\s+jarvis)?$',
                 r'^(?:au\s+revoir|bye|à\s+plus|a\s+plus)(?:\s+jarvis)?$',
                 r'^(?:ça\s+va|comment\s+vas\s+tu|tu\s+vas\s+bien)(?:\s+jarvis)?$',
+            ],
+            # open_app est le "catch-all" pour les commandes courtes, donc à la fin
+            'open_app': [
+                r'(?:ouvre|lance|démarre|ouvrir|lancer|démarrer|exécute|exécuter)\s+(.+)',
+                r'(?:ouvrir|lancer)\s+l\'application\s+(.+)',
+                r'(?:c\'est|cest|met|mets)\s+(?:le\s+|la\s+)?(.+)', # "C'est le Chrome"
+                r'(?:je\s+veux)\s+(?:lancer\s+|ouvrir\s+)?(.+)',
+                r'^([a-zA-Z0-9\s]+)$', # Nom d'app direct (ex: "Chrome") - TRÈS GÉNÉRIQUE, DOIT ÊTRE EN DERNIER
             ],
         }
     
