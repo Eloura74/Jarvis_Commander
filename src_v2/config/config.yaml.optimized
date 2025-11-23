@@ -1,0 +1,256 @@
+# ============================================
+# Configuration OPTIMISÉE de Jarvis Commander
+# ============================================
+# 
+# OPTIMISATIONS APPLIQUÉES (100% GRATUITES) :
+# - Modèle Whisper "tiny" pour latence < 1s
+# - Réduction de bruit activée (WebRTC VAD + noisereduce)
+# - Filtrage audio passe-bande 300-3400 Hz
+# - Détection automatique NVIDIA Broadcast
+# - Durée de silence réduite à 0.8s pour réactivité
+# - Durée max enregistrement 8s pour commandes courtes
+#
+# Pour utiliser cette config :
+# 1. Copiez ce fichier vers config.yaml
+# 2. Remplacez VOTRE_CLE_API_PICOVOICE par votre clé (gratuite sur console.picovoice.ai)
+# 3. Ajustez les chemins des applications selon votre système
+#
+# ============================================
+
+# Applications disponibles avec leurs chemins d'exécution
+applications:
+  # ========== NAVIGATEURS ==========
+  chrome: "C:\\Users\\faber\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe"
+  navigateur: "C:\\Users\\faber\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe"
+  google: "C:\\Users\\faber\\AppData\\Local\\Google\\Chrome\\Application\\chrome.exe"
+  
+  opera: "C:\\Users\\faber\\AppData\\Local\\Programs\\Opera\\opera.exe"
+  opéra: "C:\\Users\\faber\\AppData\\Local\\Programs\\Opera\\opera.exe"
+  
+  # ========== IMPRESSION 3D ==========
+  bambu_studio: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  bambu: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  bambou: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  bamboo: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  studio: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  impression: "A:\\Logiciels\\Bambu Studio\\bambu-studio.exe"
+  
+  # ========== CAO / DESIGN ==========
+  fusion_360: "C:\\Users\\faber\\AppData\\Local\\Autodesk\\webdeploy\\production\\6a0c9611291d45bb9226980209917c3d\\FusionLauncher.exe"
+  fusion: "C:\\Users\\faber\\AppData\\Local\\Autodesk\\webdeploy\\production\\6a0c9611291d45bb9226980209917c3d\\FusionLauncher.exe"
+  cad: "C:\\Users\\faber\\AppData\\Local\\Autodesk\\webdeploy\\production\\6a0c9611291d45bb9226980209917c3d\\FusionLauncher.exe"
+  autodesk: "C:\\Users\\faber\\AppData\\Local\\Autodesk\\webdeploy\\production\\6a0c9611291d45bb9226980209917c3d\\FusionLauncher.exe"
+  design: "C:\\Users\\faber\\AppData\\Local\\Autodesk\\webdeploy\\production\\6a0c9611291d45bb9226980209917c3d\\FusionLauncher.exe"
+  
+  # ========== FTP ==========
+  filezilla: "A:\\Logiciels\\FilleZilla\\FileZilla FTP Client\\filezilla.exe"
+  ftp: "A:\\Logiciels\\FilleZilla\\FileZilla FTP Client\\filezilla.exe"
+  
+  # ========== DÉVELOPPEMENT ==========
+  windsurf: "A:\\Logiciels\\Windsurf\\Windsurf.exe"
+  éditeur: "A:\\Logiciels\\Windsurf\\Windsurf.exe"
+  editeur: "A:\\Logiciels\\Windsurf\\Windsurf.exe"
+  code: "A:\\Logiciels\\Windsurf\\Windsurf.exe"
+  ide: "A:\\Logiciels\\Windsurf\\Windsurf.exe"
+  
+  # ========== IA / RECHERCHE ==========
+  comete: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  comet: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  comète: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  perplexity: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  recherche: "C:\\Users\\faber\\AppData\\Local\\Perplexity\\Comet\\Application\\comet.exe"
+  
+  # ========== APPLICATIONS WINDOWS ==========
+  notepad: "notepad.exe"
+  bloc-notes: "notepad.exe"
+  notes: "notepad.exe"
+  
+  explorer: "explorer.exe"
+  explorateur: "explorer.exe"
+  fichiers: "explorer.exe"
+  
+  calculator: "calc.exe"
+  calculatrice: "calc.exe"
+  calculette: "calc.exe"
+  calcul: "calc.exe"
+  calc: "calc.exe"
+
+
+# Synonymes pour les noms d'applications
+app_aliases:
+  navigateur: chrome
+  calculette: calculator
+  explorateur: explorer
+
+
+# ========================================
+# PARAMÈTRES AUDIO OPTIMISÉS
+# ========================================
+audio:
+  # Index du périphérique d'entrée (None = défaut système)
+  # Si vous utilisez NVIDIA Broadcast, il sera détecté automatiquement
+  input_device_index: null
+  
+  # Seuil de détection du silence (amplitude RMS, 0.0 à 1.0)
+  # 0.01 = sensibilité normale (recommandé)
+  # Plus bas = plus sensible (risque de faux positifs)
+  silence_threshold: 0.01
+  
+  # Durée d'enregistrement max après wake word (secondes)
+  # OPTIMISÉ : 8s suffit pour les commandes courtes (vs 10s avant)
+  # Si vos commandes sont longues, augmentez à 10 ou 12
+  max_record_duration: 8.0
+  
+  # Durée de silence pour terminer l'enregistrement (secondes)
+  # OPTIMISÉ POUR VITESSE : 0.8s (vs 1.5s avant)
+  # = Jarvis arrête d'enregistrer 0.8s après que vous ayez fini de parler
+  # Si vos commandes sont coupées, augmentez à 1.0 ou 1.2
+  silence_duration: 0.8
+  
+  # Fréquence d'échantillonnage (Hz)
+  # 16000 Hz = standard pour la voix (ne pas modifier)
+  sample_rate: 16000
+
+
+# ========================================
+# PARAMÈTRES WAKE WORD (Porcupine)
+# ========================================
+wake_word:
+  # Sensibilité (0.0 à 1.0)
+  # 0.5 = moins sensible (moins de faux positifs, risque de rater le wake word)
+  # 0.7 = équilibré (recommandé)
+  # 0.9 = très sensible (détecte mieux mais plus de faux positifs)
+  sensitivity: 0.7
+  
+  # Clé API Picovoice (GRATUITE)
+  # Obtenir sur https://console.picovoice.ai/
+  # Remplacez par votre clé personnelle ci-dessous
+  access_key: "VOTRE_CLE_API_PICOVOICE_ICI"
+
+
+# ========================================
+# PARAMÈTRES STT (Whisper) - OPTIMISÉ
+# ========================================
+stt:
+  # Modèle Whisper : tiny, base, small, medium, large
+  # OPTIMISÉ : "tiny" pour latence < 1 seconde
+  # 
+  # Comparaison des modèles :
+  # - tiny   : Latence <1s, Précision 85%, RAM 1 Go   [RECOMMANDÉ POUR VITESSE]
+  # - base   : Latence 1-2s, Précision 90%, RAM 1.5 Go
+  # - small  : Latence 2-3s, Précision 95%, RAM 2 Go   [RECOMMANDÉ POUR ÉQUILIBRE]
+  # - medium : Latence 4-6s, Précision 97%, RAM 5 Go
+  # - large  : Latence 8-12s, Précision 98%, RAM 10 Go
+  #
+  # Si tiny ne comprend pas bien, passez à "small"
+  model: "tiny"
+  
+  # Langue (fr pour français)
+  language: "fr"
+  
+  # Utiliser GPU si disponible (false car CUDA incomplet sur ce système)
+  # Si vous avez une carte NVIDIA avec CUDA configuré, passez à true
+  use_gpu: false
+  
+  # Type de calcul pour faster-whisper
+  # "int8" pour CPU (recommandé)
+  # "float16" pour GPU (si use_gpu: true)
+  compute_type: "int8"
+  
+  # ========== NOUVELLES OPTIONS D'OPTIMISATION ==========
+  
+  # Activer la réduction de bruit (filtre le film en fond)
+  # Utilise noisereduce (open source) pour supprimer les bruits constants
+  # true = recommandé si vous écoutez un film en fond
+  enable_noise_reduction: true
+  
+  # Activer Voice Activity Detection (VAD)
+  # Utilise WebRTC VAD de Google pour distinguer voix vs bruit
+  # true = recommandé (ignore le bruit du film)
+  enable_vad: true
+
+
+# ========================================
+# PARAMÈTRES TTS (Text-to-Speech)
+# ========================================
+tts:
+  # Vitesse de parole (mots par minute)
+  # 150 = lent, 180 = normal, 200 = rapide
+  rate: 180
+  
+  # Volume (0.0 à 1.0)
+  volume: 0.9
+  
+  # Voix (null = voix par défaut du système)
+  # Pour voir les voix disponibles, exécutez :
+  # python -c "import pyttsx3; engine = pyttsx3.init(); print([v.name for v in engine.getProperty('voices')])"
+  voice: null
+
+
+# ========================================
+# PARAMÈTRES DE RECHERCHE DE FICHIERS
+# ========================================
+file_search:
+  # Lecteurs à rechercher par défaut
+  default_drives: ["A:\\", "C:\\"]
+  
+  # Extensions courantes par catégorie
+  extensions:
+    images: [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg"]
+    documents: [".pdf", ".doc", ".docx", ".txt", ".odt"]
+    models_3d: [".stl", ".obj", ".3mf", ".step", ".stp"]
+    code: [".py", ".js", ".html", ".css", ".cpp", ".h"]
+    
+
+# ========================================
+# PARAMÈTRES DE L'INTERFACE
+# ========================================
+ui:
+  # Thème (dark ou light)
+  theme: "dark"
+  
+  # Taille de la fenêtre par défaut
+  window_width: 800
+  window_height: 600
+  
+  # Nombre max de lignes dans le journal
+  max_log_lines: 100
+
+
+# ========================================
+# PARAMÈTRES DE LOGGING
+# ========================================
+logging:
+  # Niveau de log (DEBUG, INFO, WARNING, ERROR)
+  # INFO = recommandé (affiche les infos importantes)
+  # DEBUG = mode développement (très verbeux)
+  level: "INFO"
+  
+  # Garder les logs pendant X jours
+  retention_days: 30
+
+
+# ============================================
+# NOTES D'UTILISATION
+# ============================================
+#
+# POUR FILTRER LE FILM EN FOND :
+# 1. Installez les nouvelles dépendances : pip install -r requirements.txt
+# 2. (Optionnel) Installez NVIDIA Broadcast si vous avez une carte RTX
+#    → Téléchargez sur https://www.nvidia.com/broadcast (GRATUIT)
+#    → Activez "Suppression du bruit" et "Suppression de l'écho"
+#    → Dans Windows, sélectionnez "Microphone (NVIDIA Broadcast)" comme micro par défaut
+# 3. Lancez Jarvis : python main.py
+#
+# RÉGLAGES FINS :
+# - Si Jarvis ne vous entend pas bien : augmentez wake_word.sensitivity à 0.8 ou 0.9
+# - Si vos commandes sont coupées : augmentez audio.silence_duration à 1.0 ou 1.2
+# - Si Jarvis ne comprend pas bien : changez stt.model de "tiny" à "small"
+# - Si c'est trop lent : vérifiez que stt.model est sur "tiny"
+#
+# DÉPANNAGE :
+# - Si le film parasite toujours : assurez-vous que enable_noise_reduction et enable_vad sont sur true
+# - Si Jarvis est trop lent : vérifiez que stt.model est sur "tiny" et non "small" ou "medium"
+# - Si la clé Picovoice ne fonctionne pas : obtenez-en une gratuite sur console.picovoice.ai
+#
+# ============================================

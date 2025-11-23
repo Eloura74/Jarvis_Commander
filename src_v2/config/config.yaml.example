@@ -1,0 +1,117 @@
+# Configuration exemple de Jarvis Commander
+# Copiez ce fichier vers config.yaml et modifiez selon vos besoins
+
+# Applications disponibles avec leurs chemins d'exécution
+applications:
+  chrome: "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+  firefox: "C:\\Program Files\\Mozilla Firefox\\firefox.exe"
+  edge: "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+  bambu_studio: "C:\\Program Files\\BambuStudio\\BambuStudio.exe"
+  fusion_360: "C:\\Users\\%USERNAME%\\AppData\\Local\\Autodesk\\webdeploy\\production\\FusionLauncher.exe"
+  discord: "C:\\Users\\%USERNAME%\\AppData\\Local\\Discord\\Update.exe --processStart Discord.exe"
+  vscode: "C:\\Users\\%USERNAME%\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+  notepad: "notepad.exe"
+  explorer: "explorer.exe"
+  calculator: "calc.exe"
+
+# Synonymes pour les noms d'applications (optionnel)
+# Utilisez des alias pour mapper plusieurs façons de dire la même chose
+# Conseil : Ajoutez des variations phonétiques pour améliorer la reconnaissance vocale
+app_aliases:
+  navigateur: chrome
+  calculatrice: calculator
+  calculette: calculator
+  calcul: calculator
+  recalculate: calculator  # Erreur de transcription courante
+  explorateur: explorer
+  bloc-notes: notepad
+  vs code: vscode
+  windsurf: vscode
+
+# Paramètres audio
+audio:
+  # Index du périphérique d'entrée (None = défaut système)
+  input_device_index: null
+  
+  # Seuil de détection du silence (en dB, plus bas = plus sensible)
+  silence_threshold: -40
+  
+  # Durée d'enregistrement max après wake word (secondes)
+  # Valeur optimisée : 8s suffit pour la plupart des commandes courtes
+  max_record_duration: 8
+  
+  # Durée de silence pour terminer l'enregistrement (secondes)
+  # OPTIMISÉ POUR VITESSE : Réduit de 1.5s à 0.8s
+  # 0.8s = bon équilibre entre vitesse et éviter de couper la parole
+  # Si vos commandes sont coupées, augmentez progressivement (0.9, 1.0, 1.2)
+  silence_duration: 0.8
+  
+  # Sample rate
+  sample_rate: 16000
+
+# Paramètres Wake Word (Porcupine)
+wake_word:
+  # Sensibilité (0.0 à 1.0, plus haut = plus sensible mais plus de faux positifs)
+  sensitivity: 0.7
+  
+  # ⚠️ IMPORTANT : Remplacez par votre clé API Picovoice
+  # Obtenez-en une gratuitement sur https://console.picovoice.ai/
+  access_key: "VOTRE_CLE_API_PICOVOICE_ICI"
+
+# Paramètres STT (Whisper)
+stt:
+  # Modèle Whisper : tiny, base, small, medium, large
+  # Recommandé: small ou medium pour bon compromis vitesse/précision
+  model: "small"
+  
+  # Langue (fr pour français)
+  language: "fr"
+  
+  # Utiliser GPU si disponible
+  use_gpu: true
+  
+  # Compute type pour faster-whisper (float16 pour GPU, int8 pour CPU)
+  compute_type: "float16"
+
+# Paramètres TTS
+tts:
+  # Vitesse de parole (mots par minute)
+  rate: 180
+  
+  # Volume (0.0 à 1.0)
+  volume: 0.9
+  
+  # Voix (null = voix par défaut du système)
+  voice: null
+
+# Paramètres de recherche de fichiers
+file_search:
+  # Lecteurs à rechercher par défaut (laissez vide pour tous)
+  default_drives: ["A:\\", "C:\\"]
+  
+  # Extensions courantes par catégorie
+  extensions:
+    images: [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg"]
+    documents: [".pdf", ".doc", ".docx", ".txt", ".odt"]
+    models_3d: [".stl", ".obj", ".3mf", ".step", ".stp"]
+    code: [".py", ".js", ".html", ".css", ".cpp", ".h"]
+    
+# Paramètres de l'interface
+ui:
+  # Thème (dark ou light)
+  theme: "dark"
+  
+  # Taille de la fenêtre par défaut
+  window_width: 800
+  window_height: 600
+  
+  # Nombre max de lignes dans le journal
+  max_log_lines: 100
+
+# Paramètres de logging
+logging:
+  # Niveau de log (DEBUG, INFO, WARNING, ERROR)
+  level: "INFO"
+  
+  # Garder les logs pendant X jours
+  retention_days: 30
