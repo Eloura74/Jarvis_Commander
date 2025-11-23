@@ -199,6 +199,7 @@ class JarvisController:
             # Attendre la fin de la réponse vocale avant de reprendre l'écoute
             if self.tts_engine:
                 self.tts_engine.wait_until_finished()
+                self.ui.set_state_threadsafe("IDLE")
             
         except Exception as e:
             logger.error(f"Erreur process: {e}")
@@ -290,6 +291,7 @@ class JarvisController:
         if response:
             self.ui.add_log_threadsafe(f"RÉPONSE: {response}", "SYS")
             if self.tts_engine:
+                self.ui.set_state_threadsafe("SPEAKING")
                 self.tts_engine.parler(response)
 
 

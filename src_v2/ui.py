@@ -63,54 +63,6 @@ body {
 .glass-panel::after {
     content: '';
     position: absolute;
-    bottom: -1px; right: -1px;
-    width: 10px; height: 10px;
-    border-bottom: 2px solid var(--neon-cyan);
-    border-right: 2px solid var(--neon-cyan);
-}
-
-/* Animation Arc Reactor */
-.arc-reactor-container {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.arc-circle {
-    position: absolute;
-    border-radius: 50%;
-    border: 2px solid var(--neon-cyan);
-    box-shadow: 0 0 20px var(--neon-cyan), inset 0 0 20px var(--neon-cyan);
-}
-
-.c1 { width: 180px; height: 180px; border-width: 4px; animation: spin-right 10s linear infinite; border-color: rgba(0, 243, 255, 0.6); border-left-color: transparent; border-right-color: transparent; }
-.c2 { width: 140px; height: 140px; border-width: 2px; animation: spin-left 7s linear infinite; border-color: rgba(0, 243, 255, 0.8); border-top-color: transparent; border-bottom-color: transparent; }
-.c3 { width: 100px; height: 100px; border-width: 6px; box-shadow: 0 0 30px var(--neon-cyan); background: rgba(0, 243, 255, 0.1); }
-
-.core-glow {
-    width: 60px; height: 60px;
-    background: radial-gradient(circle, #fff 0%, var(--neon-cyan) 60%, transparent 100%);
-    border-radius: 50%;
-    animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes spin-right { 100% { transform: rotate(360deg); } }
-@keyframes spin-left { 100% { transform: rotate(-360deg); } }
-@keyframes pulse { 0%, 100% { transform: scale(0.95); opacity: 0.8; } 50% { transform: scale(1.05); opacity: 1; } }
-
-/* Scrollbar custom */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #050510; }
-::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 3px; }
-"""
-
-from ui.components import AudioVisualizer
-
-class JarvisUI:
-    def __init__(self, brain_instance=None):
         print("DEBUG: Initialisation JarvisUI avec set_controller")
         self.brain = brain_instance
         self.logs_container = None
@@ -119,7 +71,9 @@ class JarvisUI:
         self.time_label = None
         self.date_label = None
         self.start_overlay = None
+        self.reactor_container = None # Référence au conteneur du réacteur
         self.controller = None # Référence au contrôleur principal
+        self.current_state = "IDLE" # État actuel pour le tracking
         
         # Configuration de l'app
         ui.add_head_html(f'<style>{THEME_CSS}</style>')
@@ -173,7 +127,8 @@ class JarvisUI:
             # 2. CENTRE : Arc Reactor & Interaction
             with ui.column().classes('h-full items-center justify-center relative glass-panel p-8'):
                 # Arc Reactor Animation
-                with ui.element('div').classes('arc-reactor-container mb-12'):
+                self.reactor_container = ui.element('div').classes('arc-reactor-container mb-12')
+                with self.reactor_container:
                     ui.element('div').classes('arc-circle c1')
                     ui.element('div').classes('arc-circle c2')
                     ui.element('div').classes('arc-circle c3')
@@ -246,15 +201,26 @@ class JarvisUI:
     def update_audio_level(self, level: float):
         """Met à jour le visualiseur audio."""
         if self.visualizer:
-            self.visualizer.update(level)
+            if self.current_state == "SPEAKING":
+                # En mode parole, on simule l'activité vocale de Jarvis
+                self.visualizer.simulate_speaking()
+            else:
+                # En mode écoute/idle, on affiche le niveau micro
+                self.visualizer.update(level)
 
     def set_state(self, state: str):
         """Change l'état visuel de l'interface."""
         if not self.status_label:
             return
             
+        self.current_state = state
+        
         # Reset classes
         base_classes = 'orbitron text-4xl font-bold tracking-[0.5em] animate-pulse'
+        
+        # Gestion des classes CSS dynamiques sur le réacteur
+        if self.reactor_container:
+            self.reactor_container.classes(remove='state-listening state-processing state-speaking')
         
         if state == "IDLE":
             self.status_label.text = "EN VEILLE"
@@ -265,16 +231,22 @@ class JarvisUI:
             self.status_label.text = "ÉCOUTE..."
             self.status_label.classes(replace=f'{base_classes} text-green-400')
             self._update_reactor_color('#00ff00') # Green
+            if self.reactor_container:
+                self.reactor_container.classes(add='state-listening')
             
         elif state == "PROCESSING":
             self.status_label.text = "ANALYSE..."
             self.status_label.classes(replace=f'{base_classes} text-purple-400')
             self._update_reactor_color('#a855f7') # Purple
+            if self.reactor_container:
+                self.reactor_container.classes(add='state-processing')
             
         elif state == "SPEAKING":
             self.status_label.text = "VOCALISATION"
             self.status_label.classes(replace=f'{base_classes} text-orange-400')
             self._update_reactor_color('#f97316') # Orange
+            if self.reactor_container:
+                self.reactor_container.classes(add='state-speaking')
 
     def _update_reactor_color(self, color: str):
         """Change la couleur du réacteur (via JS car CSS variables c'est mieux mais ici on fait simple)."""

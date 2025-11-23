@@ -127,11 +127,20 @@ class SystemController:
                 # Tenter quand même l'exécution (peut être dans PATH)
             
             # Lancer l'application
-            if '--' in app_path:
+            if app_path.lower().endswith('.lnk'):
+                # Les raccourcis .lnk doivent être lancés via le shell ou os.startfile
+                logger.info(f"Lancement du raccourci : {app_path}")
+                os.startfile(app_path)
+            elif '--' in app_path:
                 # Commande avec arguments (ex: Discord)
                 subprocess.Popen(app_path, shell=True)
             else:
-                subprocess.Popen([app_path], shell=False)
+                # Exécutable direct
+                if app_path.lower().endswith('.exe'):
+                    subprocess.Popen([app_path], shell=False)
+                else:
+                    # Par défaut pour le reste, utiliser le shell
+                    subprocess.Popen(app_path, shell=True)
             
             logger.info(f"Application '{matched_app}' lancée avec succès")
             return True, matched_app
