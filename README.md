@@ -1,3 +1,8 @@
+<div align="center">
+  <img src="./Jarvis_Commander_header.png" alt="Bannière Portfolio Informatique" width="100%">
+</div>
+<br>
+
 # 🤖 Jarvis Commander
 
 **Assistant vocal intelligent pour Windows** avec reconnaissance vocale locale, détection de wake word, et contrôle système complet.
